@@ -163,3 +163,15 @@ instance.animal = { mass: 10, color: 'blue' };
 // mass: 60, color: green
 // mass: 10, color: blue
 ```
+
+## Options
+
+`Observed()` Decorator takes in an optional parameter `options`.
+
+| Option | Possible Values | Notes |
+| - | - | - |
+| type | • `'subject'`<br/> • `'replay'`<br/> • `'behavior'` | Default value is `'behavior'` |
+| replayOptions | See [RxJS ReplaySubject](https://rxjs-dev.firebaseapp.com/api/index/class/ReplaySubject) | Should only be used with `type: 'replay'`|
+
+The default value for `options` is `{ type: 'behavior' }`.
+
