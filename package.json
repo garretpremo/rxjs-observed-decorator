@@ -16,7 +16,7 @@
         "url": "https://github.com/garretpremo/rxjs-observed-decorator"
     },
     "license": "ISC",
-    "dependencies": {
+    "peerDependencies": {
         "rxjs": "^6.5.5"
     },
     "devDependencies": {
@@ -25,7 +25,8 @@
         "jasmine-spec-reporter": "^7.0.0",
         "jasmine-ts": "^0.3.3",
         "ts-node": "^9.1.1",
-        "typescript": "4.2.4"
+        "typescript": "4.2.4",
+        "rxjs": "^6.5.5"
     },
     "keywords": [
         "rxjs",
