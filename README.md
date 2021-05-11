@@ -9,7 +9,7 @@ npm install rxjs-observed-decorator --save
 ```
 
 ## Important Usage Notes
-- Properties defined with `@Observed` should **always** be initialized. 
+- Properties defined with `@Observed` should **always** be initialized (Subject to change).
 
 ```
 @Observed() property: string;               // BAD ❌
@@ -18,6 +18,7 @@ npm install rxjs-observed-decorator --save
 ```
 
 - Classes with `@Observed` properties should always be instantiated.
+- **Do not** attempt to initialize the Observable property. The decorator handles that for you.
 
 ## Angular Examples
 A simple Service with an `@Observed()` property
@@ -166,7 +167,14 @@ instance.animal = { mass: 10, color: 'blue' };
 
 ## Options
 
-`Observed()` Decorator takes in an optional parameter `options`.
+`Observed()` Decorator takes in an optional parameter for `options`.
+
+```typescript
+class A {
+    @Observed({ type: 'subject' }) prop = '';
+}
+```
+
 
 | Option | Possible Values | Notes |
 | - | - | - |
@@ -174,4 +182,3 @@ instance.animal = { mass: 10, color: 'blue' };
 | replayOptions | See [RxJS ReplaySubject](https://rxjs-dev.firebaseapp.com/api/index/class/ReplaySubject) | Should only be used with `type: 'replay'`|
 
 The default value for `options` is `{ type: 'behavior' }`.
-
