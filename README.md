@@ -8,10 +8,23 @@ Adds a drop-dead simple decorator which ties a class variable to an RxJS Subject
 npm install rxjs-observed-decorator --save
 ```
 
+Requires you to add `"experimentalDecorators": true,` to `tsconfig.json`
+
+```json
+// tsconfig.json
+{
+    "compilerOptions": {
+        ...
+        "experimentalDecorators": true,
+        ...
+    }
+}
+```
+
 ## Important Usage Notes
 - Properties defined with `@Observed` should **always** be initialized (Subject to change).
 
-```
+```typescript
 @Observed() property: string;               // BAD ❌
 @Observed() property = '';                  // GOOD ✅
 @Observed() property: string = null;        // GOOD ✅
@@ -19,6 +32,12 @@ npm install rxjs-observed-decorator --save
 
 - Classes with `@Observed` properties should always be instantiated.
 - **Do not** attempt to initialize the Observable property. The decorator handles that for you.
+- If you are using `strict` mode, you can add `!` to your observable definitions to avoid errors.
+
+```typescript
+@Observed() property = '';
+readonly property$!: Observable<string>;
+```
 
 ## Angular Examples
 A simple Service with an `@Observed()` property
@@ -27,7 +46,7 @@ A simple Service with an `@Observed()` property
 export class UserService {
     
     @Observed() users: User[] = null;
-    readonly users$: Observable<User[]>;
+    readonly users$!: Observable<User[]>;
 
     constructor(private http: HttpClient) {}
 
@@ -79,7 +98,7 @@ export class MyClass {
     @Observed() myProperty = 'initial value';
     
     // Observable property is automatically created.
-    readonly myProperty$: Observable<string>;
+    readonly myProperty$!: Observable<string>;
 
     constructor() {}
 }
@@ -109,7 +128,7 @@ export class MyClass {
     @Observed({ type: 'subject' }) 
     myNumber: number = null;
     
-    readonly myNumber$: Observable<number>;
+    readonly myNumber$!: Observable<number>;
 
     constructor() {}
 }
@@ -144,7 +163,7 @@ export class MyClass {
     @Observed({ type: 'replay', replayOptions: {} }) 
     animal: Animal = null;
     
-    readonly animal$: Observable<Animal>;
+    readonly animal$!: Observable<Animal>;
 
     constructor() {}
 }
