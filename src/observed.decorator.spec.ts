@@ -7,11 +7,13 @@ const testValue2 = 25;
 const testValue3 = 50;
 
 class TestClass {
+    // @ts-ignore
     @Observed() property = testValue1;
     readonly property$!: Observable<number>;
 }
 
 class TestClassNoDefaultValue {
+    // @ts-ignore
     @Observed() property!: any;
     readonly property$!: Observable<any>;
 }
