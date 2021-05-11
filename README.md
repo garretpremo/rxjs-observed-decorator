@@ -10,7 +10,7 @@ npm install rxjs-observed-decorator --save
 
 Requires you to add `"experimentalDecorators": true,` to `tsconfig.json`
 
-```json
+```
 // tsconfig.json
 {
     "compilerOptions": {
