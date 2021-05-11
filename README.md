@@ -31,7 +31,12 @@ export class UserService {
     constructor(private http: HttpClient) {}
 
     getUsers() {
-        this.http.get('users').subscribe(users => this.users = users);
+        this.http.get('users').subscribe(users => {
+            
+            // the property setter calls '.next()' behind the scenes
+            this.users = users;
+
+        });
     }
 
 }
