@@ -1,9 +1,13 @@
 {
     "name": "rxjs-observed-decorator",
     "version": "1.0.0",
-    "description": "Extremely simple class property decorator which ties a class variable to an RxJS Subject. Works for Subject, BehaviorSubject (default), ReplaySubject",
+    "description": "Simple class property decorator which ties a class property to an RxJS Subject. Works for BehaviorSubject (default), Subject & ReplaySubject",
     "author": "Garret Premo <garretpremo@gmail.com> (https://github.com/garretpremo)",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "/dist"
+    ],
     "scripts": {
         "build": "tsc",
         "test": "jasmine-ts --config=jasmine.json"
