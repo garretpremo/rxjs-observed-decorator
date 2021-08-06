@@ -6,13 +6,18 @@ const testValue1 = 10;
 const testValue2 = 25;
 const testValue3 = 50;
 
-class TestClass {
+interface Test {
+    property: any;
+    property$: Observable<any>;
+}
+
+class TestClass implements Test {
     // @ts-ignore
     @Observed() property = testValue1;
     readonly property$!: Observable<number>;
 }
 
-class TestClassNoDefaultValue {
+class TestClassNotInitialized implements Test {
     // @ts-ignore
     @Observed() property!: any;
     readonly property$!: Observable<any>;
@@ -20,7 +25,12 @@ class TestClassNoDefaultValue {
 
 describe('Observed decorator', () => {
 
-    let subscription: Subscription;
+    let subscription = new Subscription();
+
+    const checkObservable = (testClass: Test) => {
+        subscription.add(testClass.property$.pipe(take(1))
+            .subscribe(property => { expect(property).toEqual(testClass.property); }));
+    };
 
     beforeEach(() => {
         subscription = new Subscription();
@@ -33,11 +43,6 @@ describe('Observed decorator', () => {
     it('should hold distinct data for each class instance', () => {
         const classA = new TestClass();
         const classB = new TestClass();
-
-        const checkObservable = (testClass: TestClass) => {
-            subscription.add(testClass.property$.pipe(take(1))
-                .subscribe(property => { expect(property).toEqual(testClass.property); }));
-        };
 
         expect(classA.property).toEqual(testValue1);
         expect(classB.property).toEqual(testValue1);
@@ -59,26 +64,22 @@ describe('Observed decorator', () => {
         checkObservable(classB);
     });
 
-    it('should still work properly if no defaults are specified', () => {
-        const classA = new TestClassNoDefaultValue();
-        const classB = new TestClassNoDefaultValue();
+    it('should initialize undefined @Observed variables to null, and otherwise work as expected', () => {
+        const classA = new TestClassNotInitialized();
+        const classB = new TestClassNotInitialized();
 
-        const checkObservable = (testClass: TestClassNoDefaultValue) => {
-            subscription.add(testClass.property$.pipe(take(1))
-                .subscribe(property => { expect(property).toEqual(testClass.property); }));
-        };
-
-        expect(classA.property).toBeUndefined();
-        expect(classA.property$).toBeUndefined();
-        expect(classB.property).toBeUndefined();
-        expect(classB.property$).toBeUndefined();
+        expect(classA.property).toBeNull();
+        expect(classB.property).toBeNull();
+        checkObservable(classA);
+        checkObservable(classB);
 
         classA.property = testValue1;
 
         expect(classA.property).toEqual(testValue1);
         checkObservable(classA);
-        expect(classB.property).toBeUndefined();
-        expect(classB.property$).toBeUndefined();
+
+        expect(classB.property).toBeNull();
+        checkObservable(classB);
 
         classB.property = testValue2;
 
@@ -94,5 +95,11 @@ describe('Observed decorator', () => {
         expect(classB.property).toEqual(testValue1);
         checkObservable(classA);
         checkObservable(classB);
+    });
+
+    it('should initialize observables when attempting to access the observable before it has been initialized', () => {
+        const classA = new TestClassNotInitialized();
+
+        checkObservable(classA);
     });
 });

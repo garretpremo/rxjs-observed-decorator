@@ -63,8 +63,21 @@ export const Observed = (options: ObservedDecoratorOptions = { type: 'behavior' 
                     enumerable: true,
                 });
             },
+            get() {
+                this[key] = null;
+                return null;
+            },
             enumerable: true,
             configurable: true,
+        });
+
+        Object.defineProperty(target, key + '$', {
+            get() {
+                this[key] = null;
+                return this[key + '$'];
+            },
+            set: () => {},
+            enumerable: true,
         });
     };
 };
