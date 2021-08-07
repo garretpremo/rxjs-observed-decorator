@@ -23,6 +23,30 @@ class TestClassNotInitialized implements Test {
     readonly property$!: Observable<any>;
 }
 
+class TestClassStatic {
+    // @ts-ignore
+    @Observed() static property = testValue1;
+    static property$: Observable<number>;
+}
+
+class TestClassStatic2 {
+    // @ts-ignore
+    @Observed() static property = testValue1;
+    static property$: Observable<number>;
+}
+
+abstract class TestClassStaticUninitialized {
+    // @ts-ignore
+    @Observed() static property;
+    static property$: Observable<number>;
+}
+
+abstract class TestClassStaticUninitialized2 {
+    // @ts-ignore
+    @Observed() static property;
+    static property$: Observable<number>;
+}
+
 describe('Observed decorator', () => {
 
     let subscription = new Subscription();
@@ -101,5 +125,47 @@ describe('Observed decorator', () => {
         const classA = new TestClassNotInitialized();
 
         checkObservable(classA);
+    });
+
+    it('should work for classes with static members', () => {
+        const checkStaticObservable = () => {
+            subscription.add(TestClassStatic.property$.pipe(take(1))
+                .subscribe(property => { expect(property).toEqual(TestClassStatic.property); }));
+        };
+
+        expect(TestClassStatic.property).toEqual(testValue1);
+        checkStaticObservable();
+    });
+
+    it('should work for classes with static members when accessing the observable before initialization', () => {
+        const checkStaticObservable = () => {
+            subscription.add(TestClassStatic2.property$.pipe(take(1))
+                .subscribe(property => { expect(property).toEqual(TestClassStatic2.property); }));
+        };
+
+        checkStaticObservable();
+        expect(TestClassStatic2.property).toEqual(testValue1);
+        checkStaticObservable();
+    });
+
+    it('should work for classes with static members that have not been initialized', () => {
+        const checkStaticObservable = () => {
+            subscription.add(TestClassStaticUninitialized.property$.pipe(take(1))
+                .subscribe(property => { expect(property).toEqual(TestClassStaticUninitialized.property); }));
+        };
+
+        expect(TestClassStaticUninitialized.property).toBeNull();
+        checkStaticObservable();
+    });
+
+    it('should work for classes with static members that have not been initialized when accessing the observable before initialization', () => {
+        const checkStaticObservable = () => {
+            subscription.add(TestClassStaticUninitialized2.property$.pipe(take(1))
+                .subscribe(property => { expect(property).toEqual(TestClassStaticUninitialized2.property); }));
+        };
+
+        checkStaticObservable();
+        expect(TestClassStaticUninitialized2.property).toBeNull();
+        checkStaticObservable();
     });
 });
