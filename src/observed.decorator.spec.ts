@@ -17,6 +17,12 @@ class TestClass implements Test {
     readonly property$!: Observable<number>;
 }
 
+class TestSubject {
+    // @ts-ignore
+    @Observed({ type: 'subject' }) property: number;
+    readonly property$!: Observable<number>;
+}
+
 class TestClassNotInitialized implements Test {
     // @ts-ignore
     @Observed() property!: any;
@@ -86,6 +92,29 @@ describe('Observed decorator', () => {
         expect(classB.property).toEqual(testValue3);
         checkObservable(classA);
         checkObservable(classB);
+    });
+
+    it('should provide correct Subject behavior when using type: subject', () => {
+        const classA = new TestSubject();
+
+        expect(classA.property).toBeNull();
+        let spy = spyOn(console, 'log').and.stub();
+
+        classA.property = testValue1;
+        subscription.add(classA.property$.subscribe(value => console.log(value)));
+        classA.property = testValue2;
+
+        expect(spy).toHaveBeenCalledOnceWith(testValue2);
+    });
+
+    it('should always return null from the property accessor when using type: subject', () => {
+        const classA = new TestSubject();
+
+        expect(classA.property).toBeNull();
+        classA.property = testValue1;
+        expect(classA.property).toBeNull();
+        classA.property = testValue2;
+        expect(classA.property).toBeNull();
     });
 
     it('should initialize undefined @Observed variables to null, and otherwise work as expected', () => {
