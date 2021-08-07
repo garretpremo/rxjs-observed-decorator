@@ -22,15 +22,6 @@ Requires you to add `"experimentalDecorators": true,` to `tsconfig.json`
 ```
 
 ## Important Usage Notes
-- Properties defined with `@Observed` should **always** be initialized (Subject to change).
-
-```typescript
-@Observed() property: string;               // BAD ❌
-@Observed() property = '';                  // GOOD ✅
-@Observed() property: string = null;        // GOOD ✅
-```
-
-- Classes with `@Observed` properties should always be instantiated.
 - **Do not** attempt to initialize the Observable property. The decorator handles that for you.
 - If you are using `strict` mode, you can add `!` to your observable definitions to avoid errors.
 
@@ -125,9 +116,7 @@ instance.myProperty = 'c';
 ```typescript
 export class MyClass {
 
-    @Observed({ type: 'subject' }) 
-    myNumber: number = null;
-    
+    @Observed({ type: 'subject' }) myNumber: number;
     readonly myNumber$!: Observable<number>;
 
     constructor() {}
