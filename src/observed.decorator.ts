@@ -22,6 +22,8 @@ import { ObservedDecoratorOptions } from './observed-decorator-options.interface
 export const Observed = (options: ObservedDecoratorOptions = { type: 'behavior' }) => {
     return (target: any, key: string) => {
 
+        const initialValue = target[key];
+
         // Since decorators are declarative, we have to define a setter that overwrites itself on the first set.
         // This allows the decorator to act on <i>each instance</i> of the class rather than acting as a static variable.
         Object.defineProperty(target, key, {
@@ -63,6 +65,33 @@ export const Observed = (options: ObservedDecoratorOptions = { type: 'behavior' 
                     enumerable: true,
                 });
             },
+            get() {
+                // for initialized static members, the initial set happens before the decorator is applied, causing initialValue to be populated
+                //  in this case, just call the initial overriding 'set'.
+                if (typeof initialValue !== 'undefined') {
+                    this[key] = initialValue;
+                    return initialValue;
+                }
+
+                return null;
+            },
+            enumerable: true,
+            configurable: true,
+        });
+
+        // When the @Observed property is either static or hasn't been initialized, and the user attempts to access the observable property,
+        //  we need to generate the observable property by triggering the initial overwriting 'set', and then return it.
+        Object.defineProperty(target, key + '$', {
+            get() {
+                if (typeof initialValue !== 'undefined') {
+                    this[key] = initialValue;
+                    return this[key + '$'];
+                }
+
+                this[key] = null;
+                return this[key + '$'];
+            },
+            set: () => {},
             enumerable: true,
             configurable: true,
         });
