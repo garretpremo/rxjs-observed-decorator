@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "esnext",
     "lib": [
-      "esnext"
+      "esnext",
+      "dom"
     ],
     "sourceMap": true,
     "moduleResolution": "node",
