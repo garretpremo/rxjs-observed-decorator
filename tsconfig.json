@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "target": "esnext",
+    "lib": [
+      "esnext"
+    ],
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "removeComments": true,
     "experimentalDecorators": true,
     "declaration": true,
     "outDir": "./dist"
