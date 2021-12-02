@@ -1,5 +1,5 @@
 import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
-import { ObservedDecoratorOptions } from './observed-decorator-options.interface';
+import { ObservedDecoratorOptions, ObservedDecoratorType } from './observed-decorator-options.interface';
 
 /**
  * Decorator that marks a class property to be converted into a Subject, and reserves an additional property to act as that subject's observable.
@@ -19,7 +19,7 @@ import { ObservedDecoratorOptions } from './observed-decorator-options.interface
  *              - 'replay' will create a ReplaySubject
  *          replayOptions: options for a ReplaySubject, which are just ReplaySubject's constructor arguments
  */
-export const Observed = (options: ObservedDecoratorOptions = { type: 'behavior' }) => {
+export const Observed = (options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior') => {
     return (target: any, key: string) => {
 
         const initialValue = target[key];
@@ -29,29 +29,14 @@ export const Observed = (options: ObservedDecoratorOptions = { type: 'behavior' 
         Object.defineProperty(target, key, {
             set(firstValue: any) {
 
-                let subject: Subject<any>;
-
-                switch (options.type) {
-                    case 'behavior':
-                        subject = new BehaviorSubject(firstValue ?? null);
-                        break;
-                    case 'replay':
-                        subject = new ReplaySubject(options?.replayOptions?.bufferSize, options?.replayOptions?.windowTime, options?.replayOptions?.scheduler);
-                        break;
-                    case 'subject':
-                        subject = new Subject();
-                        break;
-                    default:
-                        subject = new BehaviorSubject(firstValue ?? null);
-                }
-
+                const subject = ObservedDecorator.initializeSubject(firstValue, options);
                 const observable$ = subject.asObservable();
 
                 Object.defineProperty(this, key, {
                     get: () => {
                         if (subject instanceof BehaviorSubject) {
                             return subject.getValue();
-                        } 
+                        }
 
                         return null;
                     },
@@ -97,3 +82,25 @@ export const Observed = (options: ObservedDecoratorOptions = { type: 'behavior' 
         });
     };
 };
+
+namespace ObservedDecorator {
+    export function initializeSubject(firstValue: any, options: ObservedDecoratorType | ObservedDecoratorOptions): Subject<any> {
+        switch (getType(options)) {
+            case 'behavior':
+                return new BehaviorSubject(firstValue ?? null);
+            case 'subject':
+                return new Subject();
+            case 'replay':
+                const replayOptions = (options as ObservedDecoratorOptions)?.replayOptions;
+                return new ReplaySubject(replayOptions?.bufferSize, replayOptions?.windowTime, replayOptions?.scheduler);
+            default:
+                return new BehaviorSubject(firstValue ?? null);
+        }
+    }
+
+    export function getType(options: ObservedDecoratorType | ObservedDecoratorOptions): ObservedDecoratorType {
+        return (typeof options === 'string')
+            ? options
+            : options?.type;
+    }
+}
