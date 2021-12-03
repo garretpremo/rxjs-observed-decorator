@@ -85,7 +85,8 @@ export const Observed = (options: ObservedDecoratorType | ObservedDecoratorOptio
 
 namespace ObservedDecorator {
     export function initializeSubject(firstValue: any, options: ObservedDecoratorType | ObservedDecoratorOptions): Subject<any> {
-        switch (getType(options)) {
+        const type = (typeof options === 'string') ? options : options?.type;
+        switch (type) {
             case 'behavior':
                 return new BehaviorSubject(firstValue ?? null);
             case 'subject':
@@ -96,11 +97,5 @@ namespace ObservedDecorator {
             default:
                 return new BehaviorSubject(firstValue ?? null);
         }
-    }
-
-    export function getType(options: ObservedDecoratorType | ObservedDecoratorOptions): ObservedDecoratorType {
-        return (typeof options === 'string')
-            ? options
-            : options?.type;
     }
 }
