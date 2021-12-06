@@ -1,6 +1,6 @@
 {
     "name": "rxjs-observed-decorator",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "description": "Simple class property decorator which ties a class property to an RxJS Subject. Works for BehaviorSubject (default), Subject & ReplaySubject",
     "author": "Garret Premo <garretpremo@gmail.com> (https://github.com/garretpremo)",
     "main": "dist/index.js",
@@ -35,6 +35,8 @@
         "behavior",
         "replay",
         "observable",
-        "angular"
+        "angular",
+        "decorator",
+        "typescript"
     ]
 }
