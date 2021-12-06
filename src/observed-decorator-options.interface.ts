@@ -1,7 +1,9 @@
 import { SchedulerLike } from "rxjs";
 
+export type ObservedDecoratorType = 'behavior' | 'subject' | 'replay';
+
 export interface ObservedDecoratorOptions {
-    type: 'behavior' | 'subject' | 'replay';
+    type: ObservedDecoratorType;
     replayOptions?: {
         bufferSize?: number;
         windowTime?: number;

@@ -116,7 +116,7 @@ instance.myProperty = 'c';
 ```typescript
 export class MyClass {
 
-    @Observed({ type: 'subject' }) myNumber: number;
+    @Observed('subject') myNumber: number;
     readonly myNumber$!: Observable<number>;
 
     constructor() {}
@@ -175,11 +175,15 @@ instance.animal = { mass: 10, color: 'blue' };
 
 ## Options
 
-`Observed()` Decorator takes in an optional parameter for `options`.
+`Observed()` Decorator takes in an optional parameter for `options`. `options` can either be a `string` of the subject type, or an `Object` with more parameters as defined below.
 
 ```typescript
-class A {
-    @Observed({ type: 'subject' }) prop = '';
+class MyClass {
+    // using the subject type:
+    @Observed('subject') propA = '';
+
+    // using the options object:
+    @Observed({ type: 'subject' }) propB = '';
 }
 ```
 
@@ -189,4 +193,4 @@ class A {
 | type | • `'subject'`<br/> • `'replay'`<br/> • `'behavior'` | Default value is `'behavior'` |
 | replayOptions | See [RxJS ReplaySubject](https://rxjs-dev.firebaseapp.com/api/index/class/ReplaySubject) | Should only be used with `type: 'replay'`|
 
-The default value for `options` is `{ type: 'behavior' }`.
+The default value for `options` is `'behavior'`.

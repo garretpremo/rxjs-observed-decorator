@@ -23,6 +23,12 @@ class TestSubject {
     readonly property$!: Observable<number>;
 }
 
+class TestSubjectShorthand {
+    // @ts-ignore
+    @Observed('subject') property: number;
+    readonly property$!: Observable<number>;
+}
+
 class TestClassNotInitialized implements Test {
     // @ts-ignore
     @Observed() property!: any;
@@ -96,6 +102,19 @@ describe('Observed decorator', () => {
 
     it('should provide correct Subject behavior when using type: subject', () => {
         const classA = new TestSubject();
+
+        expect(classA.property).toBeNull();
+        let spy = spyOn(console, 'log').and.stub();
+
+        classA.property = testValue1;
+        subscription.add(classA.property$.subscribe(value => console.log(value)));
+        classA.property = testValue2;
+
+        expect(spy).toHaveBeenCalledOnceWith(testValue2);
+    });
+
+    it('should provide correct Subject behavior when using \'subject\' shorthand', () => {
+        const classA = new TestSubjectShorthand();
 
         expect(classA.property).toBeNull();
         let spy = spyOn(console, 'log').and.stub();
