@@ -19,15 +19,19 @@ import { ObservedDecoratorOptions, ObservedDecoratorType } from './observed-deco
  *              - 'replay' will create a ReplaySubject
  *          replayOptions: options for a ReplaySubject, which are just ReplaySubject's constructor arguments
  */
-export const Observed = <T>(options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior') => {
-    return (target: any, key: string) => {
+export function Observed(options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior'): PropertyDecorator {
+    return function <T>(target: Object, key: string): void {
         const initialValue: T = target[key];
 
         // Since decorators are declarative, we have to define a setter that overwrites itself on the first set.
         // This allows the decorator to act on <i>each instance</i> of the class rather than acting as a static variable.
         Object.defineProperty(target, key, {
-            get: () => ObservedDecorator.initialGetValue(target, key, initialValue),
-            set: firstValue => ObservedDecorator.initialSetValue(target, key, firstValue, options),
+            get(): T {
+                return ObservedDecorator.initialGetValue.call(this, key, initialValue);
+            },
+            set(firstValue: T): void {
+                ObservedDecorator.initialSetValue.call(this, key, firstValue, options);
+            },
             enumerable: true,
             configurable: true,
         });
@@ -35,28 +39,28 @@ export const Observed = <T>(options: ObservedDecoratorType | ObservedDecoratorOp
         // When the @Observed property is either static or hasn't been initialized, and the user attempts to access the observable property,
         //  we need to generate the observable property by triggering the initial overwriting 'set', and then return it.
         Object.defineProperty(target, key + '$', {
-            get: () => ObservedDecorator.initialGetObservable(target, key, initialValue),
-            set: () => {},
+            get(): Observable<T> {
+                return ObservedDecorator.initialGetObservable.call(this, key, initialValue);
+            },
             enumerable: true,
             configurable: true,
         });
-    };
-};
+    }
+}
 
 namespace ObservedDecorator {
-    export function initialSetValue<T>(target: any, key: string, initialValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): void {
+    export function initialSetValue<T>(key: string, initialValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): void {
         const subject = initializeSubject(initialValue, options);
         const observable$ = subject.asObservable();
 
-        Object.defineProperty(target, key, {
+        Object.defineProperty(this, key, {
             get: () => (subject instanceof BehaviorSubject) ? subject.getValue() : null,
             set: value => subject.next(value),
             enumerable: true,
         });
 
-        Object.defineProperty(target, key + '$', {
+        Object.defineProperty(this, key + '$', {
             get: () => observable$,
-            set: () => {},
             enumerable: true,
         });
     }
@@ -82,15 +86,13 @@ namespace ObservedDecorator {
      *
      * In this case, just call the initial overriding `set`.
      */
-    export function initialGetValue<T>(target: any, key: string, initialValue: T): T {
-        target[key] = initialValue ?? null;
-
-        return target[key];
+    export function initialGetValue<T>(key: string, initialValue: T): T {
+        this[key] = initialValue ?? null;
+        return this[key];
     }
 
-    export function initialGetObservable<T>(target: any, key: string, initialValue: T): Observable<T> {
-        target[key] = initialValue ?? null;
-
-        return target[key + '$'];
+    export function initialGetObservable<T>(key: string, initialValue: T): Observable<T> {
+        this[key] = initialValue ?? null;
+        return this[key + '$'];
     }
 }
