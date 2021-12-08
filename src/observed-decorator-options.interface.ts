@@ -1,4 +1,4 @@
-import { SchedulerLike } from "rxjs";
+import { SchedulerLike } from 'rxjs';
 
 export type ObservedDecoratorType = 'behavior' | 'subject' | 'replay';
 

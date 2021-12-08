@@ -2,54 +2,51 @@ import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { ObservedDecoratorOptions, ObservedDecoratorType } from './observed-decorator-options.interface';
 
 /**
- * Decorator that marks a class property to be converted into a Subject, and reserves an additional property to act as that subject's observable.
+ * Decorator that marks a class property to be converted into a `Subject`, and reserves an additional property to act as that subject's observable.
+ * @description Marking a class property with `@Observed` will generate a hidden {@link Subject} _({@link BehaviorSubject} by default)_,
+ *               and modify the getters and setters of that property to update/take from the `Subject`.
+ *               An additional property will be created for the corresponding `observable`, which is just the property name with  a `'$'` at the end.
  *
- * @usageNotes
- *
- * Marking a class property with `@Observed` will generate a hidden Subject (BehaviorSubject by default), and modify the getters and setters
- *  of that property to update/take from the Subject.
- *
- * An additional property will be created for the corresponding observable, which is just the property name with  a '$' at the end.
- *
- *  @param options - a configuration object.
- *      possible options:
- *          type: defines the type of subject to use
- *              - 'behavior' will create a BehaviorSubject (default)
- *              - 'subject' will create a Subject. **NOTE** using 'subject' will cause the parameter to never store a value in memory. Accessing the parameter will always return null.
- *              - 'replay' will create a ReplaySubject
- *          replayOptions: options for a ReplaySubject, which are just ReplaySubject's constructor arguments
+ * @param options - the {@link ObservedDecoratorType} or {@link ObservedDecoratorOptions}
+ * @param options.type - defines the type of subject to use:
+ * <br/> * `'behavior'` - will create a {@link BehaviorSubject} _(default)_
+ * <br/> * `'subject'` - will create a {@link Subject}. **NOTE** using `'subject'` will cause the parameter to never store a value in memory. Accessing the parameter will always return `null`.
+ * <br/> * `'replay'` - will create a {@link ReplaySubject}
+ * @param options.replayOptions options for a {@link ReplaySubject}, which are just its constructor arguments
  */
-export function Observed(options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior'): PropertyDecorator {
-    return function <T>(target: Object, key: string): void {
-        const initialValue: T = target[key];
-
-        // Since decorators are declarative, we have to define a setter that overwrites itself on the first set.
-        // This allows the decorator to act on <i>each instance</i> of the class rather than acting as a static variable.
-        Object.defineProperty(target, key, {
-            get(): T {
-                return ObservedDecorator.initialGetValue.call(this, key, initialValue);
-            },
-            set(firstValue: T): void {
-                ObservedDecorator.initialSetValue.call(this, key, firstValue, options);
-            },
-            enumerable: true,
-            configurable: true,
-        });
-
-        // When the @Observed property is either static or hasn't been initialized, and the user attempts to access the observable property,
-        //  we need to generate the observable property by triggering the initial overwriting 'set', and then return it.
-        Object.defineProperty(target, key + '$', {
-            get(): Observable<T> {
-                return ObservedDecorator.initialGetObservable.call(this, key, initialValue);
-            },
-            enumerable: true,
-            configurable: true,
-        });
-    }
-}
+export const Observed = (options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior') => ObservedDecorator.Observed(options);
 
 namespace ObservedDecorator {
-    export function initialSetValue<T>(key: string, initialValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): void {
+    export function Observed(options: ObservedDecoratorType | ObservedDecoratorOptions): PropertyDecorator {
+        return function <T>(target: Object, key: string): void {
+            const initialValue: T = target[key];
+
+            // Since decorators are declarative, we have to define a setter that overwrites itself on the first set.
+            // This allows the decorator to act on <i>each instance</i> of the class rather than acting as a static variable.
+            Object.defineProperty(target, key, {
+                get(): T {
+                    return initialGetValue.call(this, key, initialValue);
+                },
+                set(firstValue: T): void {
+                    initialSetValue.call(this, key, firstValue, options);
+                },
+                enumerable: true,
+                configurable: true,
+            });
+
+            // When the @Observed property is either static or hasn't been initialized, and the user attempts to access the observable property,
+            //  we need to generate the observable property by triggering the initial overwriting 'set', and then return it.
+            Object.defineProperty(target, key + '$', {
+                get(): Observable<T> {
+                    return initialGetObservable.call(this, key, initialValue);
+                },
+                enumerable: true,
+                configurable: true,
+            });
+        }
+    }
+
+    function initialSetValue<T>(key: string, initialValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): void {
         const subject = initializeSubject(initialValue, options);
         const observable$ = subject.asObservable();
 
@@ -65,7 +62,7 @@ namespace ObservedDecorator {
         });
     }
 
-    export function initializeSubject<T>(firstValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): Subject<T> {
+    function initializeSubject<T>(firstValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): Subject<T> {
         const type = (typeof options === 'string') ? options : options?.type;
         switch (type) {
             case 'behavior':
@@ -86,12 +83,12 @@ namespace ObservedDecorator {
      *
      * In this case, just call the initial overriding `set`.
      */
-    export function initialGetValue<T>(key: string, initialValue: T): T {
+    function initialGetValue<T>(key: string, initialValue: T): T {
         this[key] = initialValue ?? null;
         return this[key];
     }
 
-    export function initialGetObservable<T>(key: string, initialValue: T): Observable<T> {
+    function initialGetObservable<T>(key: string, initialValue: T): Observable<T> {
         this[key] = initialValue ?? null;
         return this[key + '$'];
     }
