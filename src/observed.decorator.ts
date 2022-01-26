@@ -1,23 +1,21 @@
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { ObservedDecoratorOptions, ObservedDecoratorType } from './observed-decorator-options.interface';
 
-/**
- * Decorator that marks a class property to be converted into a `Subject`, and reserves an additional property to act as that subject's observable.
- * @description Marking a class property with `@Observed` will generate a hidden {@link Subject} _({@link BehaviorSubject} by default)_,
- *               and modify the getters and setters of that property to update/take from the `Subject`.
- *               An additional property will be created for the corresponding `observable`, which is just the property name with  a `'$'` at the end.
- *
- * @param options - the {@link ObservedDecoratorType} or {@link ObservedDecoratorOptions}
- * @param options.type - defines the type of subject to use:
- * <br/> * `'behavior'` - will create a {@link BehaviorSubject} _(default)_
- * <br/> * `'subject'` - will create a {@link Subject}. **NOTE** using `'subject'` will cause the parameter to never store a value in memory. Accessing the parameter will always return `null`.
- * <br/> * `'replay'` - will create a {@link ReplaySubject}
- * @param options.replayOptions options for a {@link ReplaySubject}, which are just its constructor arguments
- */
-export const Observed = (options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior') => ObservedDecorator.Observed(options);
-
 namespace ObservedDecorator {
-    export function Observed(options: ObservedDecoratorType | ObservedDecoratorOptions): PropertyDecorator {
+    /**
+     * Decorator that marks a class property to be converted into a `Subject`, and reserves an additional property to act as that subject's observable.
+     * @description Marking a class property with `@Observed` will generate a hidden {@link Subject} _({@link BehaviorSubject} by default)_,
+     *               and modify the getters and setters of that property to update/take from the `Subject`.
+     *               An additional property will be created for the corresponding `observable`, which is just the property name with  a `'$'` at the end.
+     *
+     * @param options - the {@link ObservedDecoratorType} or {@link ObservedDecoratorOptions}
+     * @param options.type - defines the type of subject to use:
+     * <br/> * `'behavior'` - will create a {@link BehaviorSubject} _(default)_
+     * <br/> * `'subject'` - will create a {@link Subject}. **NOTE** using `'subject'` will cause the parameter to never store a value in memory. Accessing the parameter will always return `null`.
+     * <br/> * `'replay'` - will create a {@link ReplaySubject}
+     * @param options.replayOptions options for a {@link ReplaySubject}, which are just its constructor arguments
+     */
+    export function Observed(options: ObservedDecoratorType | ObservedDecoratorOptions = 'behavior'): PropertyDecorator {
         return function <T>(target: Object, key: string): void {
             const initialValue: T = target[key];
 
@@ -93,3 +91,6 @@ namespace ObservedDecorator {
         return this[key + '$'];
     }
 }
+
+import Observed = ObservedDecorator.Observed;
+export { Observed };
