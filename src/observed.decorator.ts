@@ -63,6 +63,7 @@ namespace ObservedDecorator {
     function initializeSubject<T>(firstValue: T, options: ObservedDecoratorType | ObservedDecoratorOptions): Subject<T> {
         const type = (typeof options === 'string') ? options : options?.type;
         switch (type) {
+            default:
             case 'behavior':
                 return new BehaviorSubject(firstValue ?? null);
             case 'subject':
@@ -70,8 +71,6 @@ namespace ObservedDecorator {
             case 'replay':
                 const replayOptions = (options as ObservedDecoratorOptions)?.replayOptions;
                 return new ReplaySubject(replayOptions?.bufferSize, replayOptions?.windowTime, replayOptions?.scheduler);
-            default:
-                return new BehaviorSubject(firstValue ?? null);
         }
     }
 
