@@ -17,7 +17,7 @@
     },
     "license": "ISC",
     "peerDependencies": {
-        "rxjs": "^6.5.5"
+        "rxjs": ">=5"
     },
     "devDependencies": {
         "@types/jasmine": "^3.7.2",
