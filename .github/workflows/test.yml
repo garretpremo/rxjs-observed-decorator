@@ -20,5 +20,5 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
       - name: Install Dependencies
         run: npm install
-      - name: Jasmine Tests
+      - name: Run Tests
         run: npm test

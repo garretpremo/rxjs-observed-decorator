@@ -76,6 +76,13 @@ describe('Observed decorator', () => {
         subscription.unsubscribe();
     });
 
+    it('should define an observable property', () => {
+        const classA = new TestClass();
+
+        expect(classA.property).toEqual(testValue1);
+        expect(classA.property$).toBeDefined();
+    });
+
     it('should hold distinct data for each class instance', () => {
         const classA = new TestClass();
         const classB = new TestClass();
@@ -104,26 +111,32 @@ describe('Observed decorator', () => {
         const classA = new TestSubject();
 
         expect(classA.property).toBeNull();
-        let spy = spyOn(console, 'log').and.stub();
+
+        const spyOn = { me: (value: any) => {} };
+        let spy = jest.spyOn(spyOn, 'me').mockImplementation();
 
         classA.property = testValue1;
-        subscription.add(classA.property$.subscribe(value => console.log(value)));
+        subscription.add(classA.property$.subscribe(value => spyOn.me(value)));
         classA.property = testValue2;
 
-        expect(spy).toHaveBeenCalledOnceWith(testValue2);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testValue2);
     });
 
     it('should provide correct Subject behavior when using \'subject\' shorthand', () => {
         const classA = new TestSubjectShorthand();
 
         expect(classA.property).toBeNull();
-        let spy = spyOn(console, 'log').and.stub();
+
+        const spyOn = { me: (value: any) => {} };
+        let spy = jest.spyOn(spyOn, 'me').mockImplementation();
 
         classA.property = testValue1;
-        subscription.add(classA.property$.subscribe(value => console.log(value)));
+        subscription.add(classA.property$.subscribe(value => spyOn.me(value)));
         classA.property = testValue2;
 
-        expect(spy).toHaveBeenCalledOnceWith(testValue2);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(testValue2);
     });
 
     it('should always return null from the property accessor when using type: subject', () => {
