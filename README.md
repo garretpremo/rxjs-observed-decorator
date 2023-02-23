@@ -8,7 +8,7 @@ Adds a drop-dead simple decorator which ties a class variable to an RxJS Subject
 npm install rxjs-observed-decorator --save
 ```
 
-Requires you to add `"experimentalDecorators": true,` to `tsconfig.json`
+Requires you to add `"experimentalDecorators": true,` & `"useDefineForClassFields": false` in `tsconfig.json`
 
 ```
 // tsconfig.json
@@ -16,6 +16,7 @@ Requires you to add `"experimentalDecorators": true,` to `tsconfig.json`
     "compilerOptions": {
         ...
         "experimentalDecorators": true,
+        "useDefineForClassFields": false,
         ...
     }
 }
@@ -58,14 +59,13 @@ A simple Component that uses the service's Observable
 @Component({ ... })
 export class UserListComponent implements OnInit {
 
-    users$: Observable<User[]>;
+    readonly users$: Observable<User[]>;
 
     constructor(private userService: UserService) {
+        this.users$ = userService.users$;
     }
 
     ngOnInit() {
-        this.users$ = this.userService.users$;
-
         this.userService.getUsers();
     }
 }
